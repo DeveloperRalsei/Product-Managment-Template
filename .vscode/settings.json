@@ -1,0 +1,11 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "name": "devDb",
+      "database": "${workspaceFolder:nextjs-item-managment-system}/db/devDb.db"
+    }
+  ],
+  "sqltools.useNodeRuntime": true
+}
