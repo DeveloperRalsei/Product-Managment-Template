@@ -1,8 +1,10 @@
 import "@mantine/core/styles.css";
+import "@mantine/nprogress/styles.css";
 
 import { createTheme, MantineProvider } from "@mantine/core";
 import type { AppProps } from "next/app";
 import { MainLayout } from "@/layouts/main";
+import { NavigationProgress } from "@mantine/nprogress";
 
 const theme = createTheme({
   colors: {
@@ -32,6 +34,7 @@ const theme = createTheme({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <MantineProvider theme={theme}>
+      <NavigationProgress />
       <Component {...pageProps} />
     </MantineProvider>
   );

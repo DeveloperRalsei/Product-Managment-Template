@@ -1,9 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { dbPath } from "@/pages/definitions";
+import { dbPath } from "@/lib/definitions";
 import { OPEN_READWRITE, OPEN_CREATE, Database } from "sqlite3";
 import bcrypt from "bcrypt";
-import { runQuery } from "@/pages/api/utils";
-import { cookies } from "next/headers";
+import { runQuery } from "@/lib/utils";
 
 export default async function handler(
   req: NextApiRequest,
@@ -41,14 +40,7 @@ export default async function handler(
       "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT, isAdmin INTEGER DEFAULT 0)"
     );
 
-    const hashedPassword = await bcrypt.hash(password, 10, (err) => {
-      if (err) {
-        console.error("An error occurred while hashing password: ", err.message);
-        return res
-          .status(500)
-          .json({ error: "Operation failed: " + err.message });
-      }
-    });
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await runQuery(db, "INSERT INTO users (name, email, password) VALUES (?, ?, ?)", [
       name,

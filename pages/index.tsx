@@ -14,6 +14,8 @@ export default function Home() {
     }
   }, [userToken, router])
 
+  console.log(userToken)
+
   return (
     <MainLayout>
       {userToken ? "Content" : <LoadingOverlay />}
