@@ -1,12 +1,22 @@
 import { MainLayout } from "@/layouts/main";
-import { AppShell } from "@mantine/core";
+import { LoadingOverlay } from "@mantine/core";
+import Cookie from 'js-cookie'
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 export default function Home() {
-  
+  const userToken = Cookie.get("userToken") || "";
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!userToken) {
+      router.push("/login")
+    }
+  }, [userToken, router])
 
   return (
     <MainLayout>
-      test
+      {userToken ? "Content" : <LoadingOverlay />}
     </MainLayout>
   )
 }
