@@ -3,10 +3,9 @@ import "@mantine/nprogress/styles.css";
 
 import { createTheme, MantineProvider } from "@mantine/core";
 import type { AppProps } from "next/app";
-import { MainLayout } from "@/layouts/main";
 import { NavigationProgress } from "@mantine/nprogress";
 
-const theme = createTheme({
+export const theme = createTheme({
   colors: {
     dark: [
       "#C1C2C5",
@@ -23,7 +22,7 @@ const theme = createTheme({
   },
   components: {
     ActionIcon: {
-      defaultProps: { variant: "light" },
+      defaultProps: { variant: "filled"},
     },
     Button: {
       defaultProps: { variant: "light" },
