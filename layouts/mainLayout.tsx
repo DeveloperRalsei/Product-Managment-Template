@@ -19,9 +19,12 @@ import {
   IconAdjustmentsAlt,
   IconUsersGroup,
   IconMenuOrder,
+  IconLogout,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import React from "react";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 const NavLinks = [
   { label: "Home", href: "/", icon: <IconHomeFilled /> },
@@ -34,6 +37,7 @@ const NavLinks = [
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [navbarOpen, { toggle }] = useDisclosure();
   const [active, setActive] = React.useState(0);
+  const router = useRouter()
 
   return (
     <AppShell
@@ -64,28 +68,40 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       </AppShell.Header>
 
       <AppShell.Navbar>
-        <Stack
-          w={"100%"}
-          h={"100%"}
-          align={"center"}
-          mt={"sm"}
-          visibleFrom="sm">
-          {NavLinks.map((link, index) => (
-            <Tooltip
-              label={link.label}
-              key={link.label}
-              position="right"
-              withArrow>
-              <Link href={link.href} >
-                <ActionIcon
-                  size={"lg"}
-                  color={active === index ? "pink" : theme.primaryColor}
-                  onClick={() => setActive(index)}>
-                  {link.icon}
-                </ActionIcon>
-              </Link>
-            </Tooltip>
-          ))}
+        <Stack h={"100%"} py={"lg"} align="center">
+          <Stack
+            w={"100%"}
+            h={"100%"}
+            align={"center"}
+            visibleFrom="sm">
+            {NavLinks.map((link, index) => (
+              <Tooltip
+                label={link.label}
+                key={link.label}
+                position="right"
+                withArrow>
+                <Link href={link.href}>
+                  <ActionIcon
+                    size={"lg"}
+                    color={active === index ? "pink" : theme.primaryColor}
+                    onClick={() => setActive(index)}>
+                    {link.icon}
+                  </ActionIcon>
+                </Link>
+              </Tooltip>
+            ))}
+          </Stack>
+          <Stack>
+            <ActionIcon
+              size={"lg"}
+              color={theme.primaryColor}
+              onClick={() => {
+                Cookies.remove("userToken")
+                router.push("/login")
+              }}>
+                <IconLogout/>
+              </ActionIcon>
+          </Stack>
         </Stack>
       </AppShell.Navbar>
 

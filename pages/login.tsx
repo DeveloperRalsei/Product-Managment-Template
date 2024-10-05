@@ -11,11 +11,21 @@ import { useForm } from "@mantine/form";
 import { nprogress } from "@mantine/nprogress";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { getCookie } from "@/lib/utils";
 
 export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const token = Cookies.get("userToken") || "";
+
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, []);
 
   const form = useForm({
     mode: "uncontrolled",
@@ -34,7 +44,7 @@ export default function Login() {
   function handleForm(values: any) {
     nprogress.start();
     console.log(values);
-    setError("")
+    setError("");
 
     const bodyParams = new URLSearchParams();
     bodyParams.append("email", values.email);
@@ -49,13 +59,14 @@ export default function Login() {
     })
       .then((response) => {
         if (process.env.NODE_ENV === "development") {
-          console.log(response, bodyParams.toString());
+          const token = getCookie("userToken");
+          response.json().then((data) => console.log(data));
+          console.log(bodyParams.toString(), token);
         }
-
         nprogress.complete();
 
         if (!response.ok) {
-          setError("Login failed : " + response.statusText);
+          setError("Login failed");
           return;
         }
 
