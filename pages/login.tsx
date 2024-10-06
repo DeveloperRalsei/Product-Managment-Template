@@ -105,6 +105,7 @@ export default function Login() {
             <TextInput
               label="Password"
               placeholder="Enter your password"
+              type="password"
               {...form.getInputProps("password")}
               required
             />

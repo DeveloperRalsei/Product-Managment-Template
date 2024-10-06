@@ -3,10 +3,12 @@ import { theme } from "@/pages/_app";
 import {
   ActionIcon,
   AppShell,
+  Box,
   Burger,
   Container,
   Flex,
   Group,
+  NavLink,
   Stack,
   Title,
   Tooltip,
@@ -31,37 +33,36 @@ import { useRouter } from "next/navigation";
 const NavLinks = [
   { label: "Home", href: "/", icon: <IconHomeFilled /> },
   { label: "Products", href: "/products", icon: <IconAddressBook /> },
-  { label: "users", href: "/users", icon: <IconUsersGroup /> },
+  { label: "Users", href: "/users", icon: <IconUsersGroup /> },
   { label: "Orders", href: "/orders", icon: <IconMenuOrder /> },
   { label: "Settings", href: "/settings", icon: <IconAdjustmentsAlt /> },
 ];
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { req } = context
-  const token = req.cookies.userToken || ""
+  const { req } = context;
+  const token = req.cookies.userToken || "";
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET as string)
+    jwt.verify(token, process.env.JWT_SECRET as string);
     return {
       redirect: {
         destination: "/dashboard",
         permanent: false,
       },
-    }
+    };
   } catch (error) {
     return {
       redirect: {
         destination: "/login",
         permanent: false,
       },
-    }
+    };
   }
-}
+};
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [navbarOpen, { toggle }] = useDisclosure();
-  const [active, setActive] = React.useState(0);
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <AppShell
@@ -93,11 +94,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
       <AppShell.Navbar>
         <Stack h={"100%"} py={"lg"} align="center">
-          <Stack
-            w={"100%"}
-            h={"100%"}
-            align={"center"}
-            visibleFrom="sm">
+          <Stack w={"100%"} h={"100%"} align={"center"} visibleFrom="sm">
             {NavLinks.map((link, index) => (
               <Tooltip
                 label={link.label}
@@ -105,29 +102,43 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 position="right"
                 withArrow>
                 <Link href={`/dashboard${link.href}`}>
-                  <ActionIcon
-                    size={"lg"}
-                    color={active === index ? "pink" : theme.primaryColor}
-                    onClick={() => setActive(index)}>
-                    {link.icon}
-                  </ActionIcon>
+                  <ActionIcon size={"lg"}>{link.icon}</ActionIcon>
                 </Link>
               </Tooltip>
+            ))}
+          </Stack>
+          <Stack gap={3} hiddenFrom="sm" w={"100%"} h={"100%"}>
+            {NavLinks.map((link) => (
+              <NavLink
+                component={Link}
+                label={link.label}
+                href={`/dashboard${link.href}`}
+                key={link.label}
+                w={"100%"}
+                variant="subtle"
+                leftSection={link.icon}
+              />
             ))}
           </Stack>
           <Stack>
             <ActionIcon
               size={"lg"}
               color={theme.primaryColor}
+              w={"100%"}
               onClick={async () => {
-                nprogress.start()
+                nprogress.start();
                 fetch("/api/users/logout", {
-                  method: "POST"
-                })
-                router.push("/login")
+                  method: "POST",
+                }).then((response) => {
+                  nprogress.complete();
+                  if (!response.ok) {
+                    return;
+                  }
+                  router.push("/login");
+                });
               }}>
-                <IconLogout/>
-              </ActionIcon>
+              <IconLogout />
+            </ActionIcon>
           </Stack>
         </Stack>
       </AppShell.Navbar>
