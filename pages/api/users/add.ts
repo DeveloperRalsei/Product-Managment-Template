@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { openDb, runQuery } from "@/lib/utils";
+import { User } from "@/lib/definitions";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,16 +14,39 @@ export default async function handler(
     return;
   }
 
-  const { name, email, password, role } = req.body;
+  const token = req.headers["authorization"]?.split(" ")[1];
 
-  if (!email || !password || !role) {
-    return res
-      .status(400)
-      .send("'role, email' and 'password' body parameters required!");
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
-    const db = await openDb()
+    const decoded = (await jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    )) as JwtPayload;
+
+    const { name, email, password, role } = req.body;
+
+    // roles: 0 - moderator, 1 - user, 2 - admin
+    if (decoded.role !== 2) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized. Only admins can add users." });
+    }
+
+    // Ensure the 'role' field is valid (0 - user, 1 - mod, 2 - admin)
+    if (![0, 1, 2].includes(role)) {
+      return res.status(400).json({ message: "Invalid role provided" });
+    }
+
+    if (!email || !password || !role) {
+      return res
+        .status(400)
+        .send("'role, email' and 'password' body parameters required!");
+    }
+
+    const db = await openDb();
 
     await runQuery(
       db,

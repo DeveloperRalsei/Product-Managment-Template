@@ -1,5 +1,6 @@
 import { MainLayout } from "@/layouts/mainLayout";
 import { User } from "@/lib/definitions";
+import { withAuth } from "@/lib/withAuth";
 import {
   Alert,
   Button,
@@ -11,11 +12,39 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { nprogress } from "@mantine/nprogress";
-import { IconAlertCircleFilled, IconKeyFilled, IconMailFilled, IconTextCaption, IconUser } from "@tabler/icons-react";
+import {
+  IconAlertCircleFilled,
+  IconKeyFilled,
+  IconMailFilled,
+  IconTextCaption,
+  IconUser,
+} from "@tabler/icons-react";
+import { GetServerSideProps } from "next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function CreateUser() {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req } = context;
+
+  const token = req.cookies.userToken || null;
+
+  if (!token) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      token,
+    },
+  };
+};
+
+export default function CreateUser({ token }: { token: string }) {
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -24,13 +53,12 @@ export default function CreateUser() {
       name: "",
       email: "",
       password: "",
-      role: "2"
+      role: "0",
     },
 
     validateInputOnChange: true,
     validate: {
-      name: (value) =>
-        value.length < 2 ? "Name too short" : null,
+      name: (value) => (value.length < 2 ? "Name too short" : null),
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
       password: (value) =>
         value.length < 4 ? "Password must be at least 4 characters" : null,
@@ -40,28 +68,31 @@ export default function CreateUser() {
   async function handleSubmit(values: Omit<User, "id">) {
     nprogress.start();
 
-    
     try {
       const payload = {
         ...values,
-        role: Number(values.role)
-      }
+        role: Number(values.role),
+      };
+
       const response = await fetch("/api/users/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        setError("An error occurred while adding user");
-        throw new Error("An error occurred while adding user");
+      console.log(response);
+
+      if (!response.ok || response.status === 401) {
+        setError("Something went wrong while adding user");
+        throw new Error("Something went wrong while adding user");
       }
 
       router.push("/dashboard/users");
-    } catch (error) {
-      setError("An error occurred while adding user: " + error);
+    } catch (error: any) {
+      setError(error.message);
       console.error(error);
     } finally {
       nprogress.complete();
@@ -82,34 +113,34 @@ export default function CreateUser() {
               p="sm"
               color="red"
               icon={<IconAlertCircleFilled />}>
-              This is a new user
+              {error}
             </Alert>
           )}
         </Group>
 
         <form
           onSubmit={form.onSubmit((values) =>
-            handleSubmit({...values, role: Number(values.role) as (0 | 1 | 2)})
+            handleSubmit({ ...values, role: Number(values.role) as 0 | 1 | 2 })
           )}>
           <Stack>
             <TextInput
               label="Name"
-              leftSection={<IconTextCaption/>}
+              leftSection={<IconTextCaption />}
               placeholder="User Name"
               {...form.getInputProps("name")}
               required
             />
             <TextInput
               label="Email"
-              leftSection={<IconMailFilled/>}
+              leftSection={<IconMailFilled />}
               placeholder="Enter user email"
               type="email"
               {...form.getInputProps("email")}
               required
             />
             <TextInput
-              label="Name"
-              leftSection={<IconKeyFilled/>}
+              label="Password" // Fixed label
+              leftSection={<IconKeyFilled />}
               placeholder="User Password"
               type="password"
               {...form.getInputProps("password")}
@@ -117,7 +148,9 @@ export default function CreateUser() {
             />
             <Select
               label="Role"
-              description={"Warning: Admin role has access to all features in the system"}
+              description={
+                "Warning: Admin role has access to all features in the system"
+              }
               leftSection={<IconUser />}
               placeholder="Select Role"
               data={[

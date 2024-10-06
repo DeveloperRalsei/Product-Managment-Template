@@ -1,6 +1,6 @@
 import { User } from "@/lib/definitions";
 import { ActionIcon, Badge, Group, Table } from "@mantine/core";
-import { IconEdit } from "@tabler/icons-react";
+import { IconEdit, IconTrash } from "@tabler/icons-react";
 import Link from "next/link";
 
 export function UserTable({ users }: { users: User[] }) {
@@ -23,6 +23,9 @@ export function UserTable({ users }: { users: User[] }) {
         <Group>
           <ActionIcon component={Link} href={`/dashboard/users/${user.id}`}>
             <IconEdit />
+          </ActionIcon>
+          <ActionIcon color="red" component={Link} href={`/dashboard/users/delete/${user.id}`}>
+            <IconTrash />
           </ActionIcon>
         </Group>
       </Table.Td>
