@@ -1,5 +1,4 @@
 import { dbPath } from "@/lib/definitions";
-import { runQueryAll } from "@/lib/utils";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Database } from "sqlite3";
 

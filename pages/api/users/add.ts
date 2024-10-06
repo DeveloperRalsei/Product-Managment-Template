@@ -1,6 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { dbPath } from "@/lib/definitions";
-import { OPEN_READWRITE, OPEN_CREATE, Database } from "sqlite3";
 import bcrypt from "bcrypt";
 import { openDb, runQuery } from "@/lib/utils";
 
@@ -14,12 +12,12 @@ export default async function handler(
     return;
   }
 
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
-  if (!email || !password) {
+  if (!email || !password || !role) {
     return res
       .status(400)
-      .send("'email' and 'password' body parameters required!");
+      .send("'role, email' and 'password' body parameters required!");
   }
 
   try {
@@ -27,15 +25,15 @@ export default async function handler(
 
     await runQuery(
       db,
-      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT, isAdmin INTEGER DEFAULT 0)"
+      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT, role INTEGER DEFAULT 0)"
     );
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await runQuery(
       db,
-      "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-      [name, email, hashedPassword]
+      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+      [name, email, hashedPassword, role]
     );
 
     return res.status(200).json({ message: "User added successfully" });

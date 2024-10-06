@@ -7,6 +7,6 @@ export const getServerSideProps = withAuth()
 export default function User() {
   const {id} = useParams()
   return (
-    <MainLayout><h1>{id} User Page</h1></MainLayout>
+    <MainLayout><h1>{id} User Edit Page</h1></MainLayout>
   )
 }

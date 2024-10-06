@@ -28,6 +28,9 @@ export const theme = createTheme({
     Button: {
       defaultProps: { variant: "light" },
     },
+    Group: {
+      defaultProps: { wrap: "nowrap" },
+    }
   },
 });
 

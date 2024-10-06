@@ -1,9 +1,7 @@
-import { ColorSchemeToggler } from "@/components/ColorSchemeToggler";
 import { theme } from "@/pages/_app";
 import {
   ActionIcon,
   AppShell,
-  Box,
   Burger,
   Container,
   Flex,
@@ -11,6 +9,7 @@ import {
   NavLink,
   Stack,
   Title,
+  Text,
   Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -22,6 +21,8 @@ import {
   IconUsersGroup,
   IconMenuOrder,
   IconLogout,
+  IconChevronRight,
+  IconDeviceDesktop,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import React from "react";
@@ -29,6 +30,7 @@ import { GetServerSideProps } from "next";
 import jwt from "jsonwebtoken";
 import { nprogress } from "@mantine/nprogress";
 import { useRouter } from "next/navigation";
+import { LogoutButton, ColorSchemeToggler, FullScreenButton } from "@/components/Buttons";
 
 const NavLinks = [
   { label: "Home", href: "/", icon: <IconHomeFilled /> },
@@ -62,7 +64,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [navbarOpen, { toggle }] = useDisclosure();
-  const router = useRouter();
 
   return (
     <AppShell
@@ -73,7 +74,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         collapsed: { desktop: false, mobile: !navbarOpen },
       }}>
       <AppShell.Header>
-        <Flex
+        <Group
           h={"100%"}
           w={"100%"}
           align={"center"}
@@ -88,14 +89,16 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           </Group>
           <Group>
             <ColorSchemeToggler />
+            <FullScreenButton/>
+            <LogoutButton/>
           </Group>
-        </Flex>
+        </Group>
       </AppShell.Header>
 
       <AppShell.Navbar>
         <Stack h={"100%"} py={"lg"} align="center">
           <Stack w={"100%"} h={"100%"} align={"center"} visibleFrom="sm">
-            {NavLinks.map((link, index) => (
+            {NavLinks.map((link) => (
               <Tooltip
                 label={link.label}
                 key={link.label}
@@ -117,28 +120,13 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 w={"100%"}
                 variant="subtle"
                 leftSection={link.icon}
+                rightSection={
+                  <Text size="sm" c="dimmed">
+                    <IconChevronRight size={16}/>
+                  </Text>
+                }
               />
             ))}
-          </Stack>
-          <Stack>
-            <ActionIcon
-              size={"lg"}
-              color={theme.primaryColor}
-              w={"100%"}
-              onClick={async () => {
-                nprogress.start();
-                fetch("/api/users/logout", {
-                  method: "POST",
-                }).then((response) => {
-                  nprogress.complete();
-                  if (!response.ok) {
-                    return;
-                  }
-                  router.push("/login");
-                });
-              }}>
-              <IconLogout />
-            </ActionIcon>
           </Stack>
         </Stack>
       </AppShell.Navbar>

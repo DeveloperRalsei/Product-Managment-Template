@@ -11,7 +11,7 @@ import { useForm } from "@mantine/form";
 import { nprogress } from "@mantine/nprogress";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { GetServerSideProps } from "next";
 import jwt from "jsonwebtoken";
 
@@ -37,7 +37,6 @@ export default function Login() {
   const router = useRouter();
 
   const form = useForm({
-    mode: "uncontrolled",
     initialValues: {
       email: "",
       password: "",
@@ -53,10 +52,6 @@ export default function Login() {
   function handleForm(values: any) {
     nprogress.start();
     setError("");
-
-    const bodyParams = new URLSearchParams();
-    bodyParams.append("email", values.email);
-    bodyParams.append("password", values.password);
 
     fetch("/api/users/login", {
       method: "POST",
@@ -93,7 +88,7 @@ export default function Login() {
         </Alert>
       )}
       <Title order={2}>Login</Title>
-      <Paper bg={DEFAULT_THEME.colors.gray[9]} p={"md"}>
+      <Paper withBorder shadow="md" p={"md"}>
         <form onSubmit={form.onSubmit((values) => handleForm(values))}>
           <Stack gap={"sm"}>
             <TextInput
