@@ -23,8 +23,10 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import React from "react";
-import Cookies from "js-cookie";
-import { useRouter } from "next/router";
+import { GetServerSideProps } from "next";
+import jwt from "jsonwebtoken";
+import { nprogress } from "@mantine/nprogress";
+import { useRouter } from "next/navigation";
 
 const NavLinks = [
   { label: "Home", href: "/", icon: <IconHomeFilled /> },
@@ -33,6 +35,28 @@ const NavLinks = [
   { label: "Orders", href: "/orders", icon: <IconMenuOrder /> },
   { label: "Settings", href: "/settings", icon: <IconAdjustmentsAlt /> },
 ];
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req } = context
+  const token = req.cookies.userToken || ""
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET as string)
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false,
+      },
+    }
+  } catch (error) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    }
+  }
+}
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [navbarOpen, { toggle }] = useDisclosure();
@@ -80,7 +104,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 key={link.label}
                 position="right"
                 withArrow>
-                <Link href={link.href}>
+                <Link href={`/dashboard${link.href}`}>
                   <ActionIcon
                     size={"lg"}
                     color={active === index ? "pink" : theme.primaryColor}
@@ -95,8 +119,11 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             <ActionIcon
               size={"lg"}
               color={theme.primaryColor}
-              onClick={() => {
-                Cookies.remove("userToken")
+              onClick={async () => {
+                nprogress.start()
+                fetch("/api/users/logout", {
+                  method: "POST"
+                })
                 router.push("/login")
               }}>
                 <IconLogout/>

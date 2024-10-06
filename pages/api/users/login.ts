@@ -1,10 +1,12 @@
-import { dbPath } from "@/lib/definitions";
 import { NextApiRequest, NextApiResponse } from "next";
-import { Database, OPEN_CREATE, OPEN_READWRITE } from "sqlite3";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { openDb } from "@/lib/utils";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -18,17 +20,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       .send("'email' and 'password' body parameters required!");
   }
 
-  const db = new Database(dbPath, OPEN_READWRITE | OPEN_CREATE, (err) => {
-    if (err) {
-      console.error(
-        "An error occurred while connecting to the database: ",
-        err.message
-      );
-      return res
-        .status(500)
-        .json({ error: "Database connection failed: " + err.message });
-    }
-  });
+  const db = await openDb();
 
   db.get(
     "SELECT * FROM users WHERE email = ?",

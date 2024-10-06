@@ -12,20 +12,29 @@ import { nprogress } from "@mantine/nprogress";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import { getCookie } from "@/lib/utils";
+import { GetServerSideProps } from "next";
+import jwt from "jsonwebtoken";
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { req } = context;
+  const token = req.cookies.userToken || "";
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET as string);
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false,
+      },
+    };
+  } catch (error) {
+    return { props: {} };
+  }
+};
 
 export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
-
-  useEffect(() => {
-    const token = Cookies.get("userToken") || "";
-
-    if (token) {
-      router.push("/dashboard");
-    }
-  }, []);
 
   const form = useForm({
     mode: "uncontrolled",
@@ -43,7 +52,6 @@ export default function Login() {
 
   function handleForm(values: any) {
     nprogress.start();
-    console.log(values);
     setError("");
 
     const bodyParams = new URLSearchParams();
@@ -53,18 +61,12 @@ export default function Login() {
     fetch("/api/users/login", {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
       },
-      body: bodyParams.toString(),
+      body: JSON.stringify(values),
     })
       .then((response) => {
-        if (process.env.NODE_ENV === "development") {
-          const token = getCookie("userToken");
-          response.json().then((data) => console.log(data));
-          console.log(bodyParams.toString(), token);
-        }
         nprogress.complete();
-
         if (!response.ok) {
           setError("Login failed");
           return;
@@ -74,7 +76,7 @@ export default function Login() {
       })
       .catch((error) => {
         console.error(error);
-        setError("Login failed : " + error.message);
+        setError("Login failed: " + error.message);
       });
   }
 

@@ -22,7 +22,7 @@ export const theme = createTheme({
   },
   components: {
     ActionIcon: {
-      defaultProps: { variant: "filled"},
+      defaultProps: { variant: "light"},
     },
     Button: {
       defaultProps: { variant: "light" },
@@ -32,7 +32,7 @@ export const theme = createTheme({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={theme} defaultColorScheme="dark">
       <NavigationProgress />
       <Component {...pageProps} />
     </MantineProvider>

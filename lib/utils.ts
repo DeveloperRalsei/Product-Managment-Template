@@ -1,4 +1,5 @@
-import { Database } from "sqlite3";
+import { Database, OPEN_CREATE, OPEN_READWRITE } from "sqlite3";
+import { dbPath } from "./definitions";
 
 export const runQuery = (
   db: Database,
@@ -43,4 +44,16 @@ export const getCookie = (cookieName: string) => {
   });
 
   return "";
+};
+
+export const openDb = async (): Promise<Database> => {
+  return new Promise((resolve, reject) => {
+    const db = new Database(dbPath, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(db);
+      }
+    });
+  });
 };
