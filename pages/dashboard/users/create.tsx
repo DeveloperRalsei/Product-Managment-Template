@@ -38,9 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   return {
-    props: {
-      token,
-    },
+    props: {token},
   };
 };
 
@@ -53,7 +51,7 @@ export default function CreateUser({ token }: { token: string }) {
       name: "",
       email: "",
       password: "",
-      role: "0",
+      role: "user",
     },
 
     validateInputOnChange: true,
@@ -65,14 +63,10 @@ export default function CreateUser({ token }: { token: string }) {
     },
   });
 
-  async function handleSubmit(values: Omit<User, "id">) {
+  async function handleSubmit(values: any) {
     nprogress.start();
 
     try {
-      const payload = {
-        ...values,
-        role: Number(values.role),
-      };
 
       const response = await fetch("/api/users/add", {
         method: "POST",
@@ -80,7 +74,7 @@ export default function CreateUser({ token }: { token: string }) {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(values),
       });
 
       console.log(response);
@@ -120,7 +114,7 @@ export default function CreateUser({ token }: { token: string }) {
 
         <form
           onSubmit={form.onSubmit((values) =>
-            handleSubmit({ ...values, role: Number(values.role) as 0 | 1 | 2 })
+            handleSubmit({ ...values })
           )}>
           <Stack>
             <TextInput
@@ -139,7 +133,7 @@ export default function CreateUser({ token }: { token: string }) {
               required
             />
             <TextInput
-              label="Password" // Fixed label
+              label="Password"
               leftSection={<IconKeyFilled />}
               placeholder="User Password"
               type="password"
@@ -154,9 +148,9 @@ export default function CreateUser({ token }: { token: string }) {
               leftSection={<IconUser />}
               placeholder="Select Role"
               data={[
-                { label: "Admin", value: "2" },
-                { label: "Mod", value: "1" },
-                { label: "User", value: "0" },
+                { label: "Admin", value: "admin" },
+                { label: "Moderator", value: "mod" },
+                { label: "User", value: "user" },
               ]}
               {...form.getInputProps("role")}
             />

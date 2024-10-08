@@ -1,8 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { openDb, runQuery } from "@/lib/utils";
-import { User } from "@/lib/definitions";
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,50 +9,48 @@ export default async function handler(
 ) {
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-    return;
+    return res
+      .status(405)
+      .json({ error: "Method not allowed. Use POST method" });
+  }
+
+  const { name, email, password, role } = req.body;
+
+  if (!name || !role || !email || !password) {
+    return res
+      .status(400)
+      .json({
+        error: "Please provide all fields: name, email, password, role",
+      });
   }
 
   const token = req.headers["authorization"]?.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   try {
-    const decoded = (await jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    )) as JwtPayload;
+    jwt.verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+    });
 
-    const { name, email, password, role } = req.body;
+    const decoded = await jwt.decode(token) as jwt.JwtPayload
 
-    // roles: 0 - moderator, 1 - user, 2 - admin
-    if (decoded.role !== 2) {
-      return res
-        .status(401)
-        .json({ message: "Unauthorized. Only admins can add users." });
+    if (decoded.role !== "admin") {
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // Ensure the 'role' field is valid (0 - user, 1 - mod, 2 - admin)
-    if (![0, 1, 2].includes(role)) {
-      return res.status(400).json({ message: "Invalid role provided" });
-    }
-
-    if (!email || !password || !role) {
-      return res
-        .status(400)
-        .send("'role, email' and 'password' body parameters required!");
-    }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const db = await openDb();
 
     await runQuery(
       db,
-      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT, role INTEGER DEFAULT 0)"
+      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, password TEXT, role TEXT)"
     );
-
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     await runQuery(
       db,
@@ -61,9 +58,12 @@ export default async function handler(
       [name, email, hashedPassword, role]
     );
 
-    return res.status(200).json({ message: "User added successfully" });
-  } catch (err: any) {
-    console.error("An error occurred: ", err.message);
-    return res.status(500).json({ error: "Operation failed: " + err.message });
+    db.close();
+    return res.status(200).json({ message: "User created successfully" });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while creating user" });
   }
 }

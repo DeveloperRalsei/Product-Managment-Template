@@ -5,6 +5,10 @@ import { createTheme, MantineProvider } from "@mantine/core";
 import type { AppProps } from "next/app";
 import { NavigationProgress } from "@mantine/nprogress";
 import { MainLayout } from "@/layouts/mainLayout";
+import { ModalsProvider } from "@mantine/modals";
+import { UserProvider } from "@/contexts/userContext";
+import { withAuth } from "@/lib/withAuth";
+import { GetServerSideProps } from "next";
 
 export const theme = createTheme({
   colors: {
@@ -23,22 +27,29 @@ export const theme = createTheme({
   },
   components: {
     ActionIcon: {
-      defaultProps: { variant: "light"},
+      defaultProps: { variant: "light" },
     },
     Button: {
       defaultProps: { variant: "light" },
     },
     Group: {
       defaultProps: { wrap: "nowrap" },
-    }
+    },
+    Tooltip: {
+      defaultProps: { color: "dark" },
+    },
   },
 });
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
-      <NavigationProgress />
-        <Component {...pageProps} />
+      <ModalsProvider>
+        <NavigationProgress />
+        <UserProvider>
+          <Component {...pageProps} />
+        </UserProvider>
+      </ModalsProvider>
     </MantineProvider>
   );
 }

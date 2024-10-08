@@ -1,10 +1,8 @@
-import { theme } from "@/pages/_app";
 import {
   ActionIcon,
   AppShell,
   Burger,
   Container,
-  Flex,
   Group,
   NavLink,
   Stack,
@@ -20,17 +18,21 @@ import {
   IconAdjustmentsAlt,
   IconUsersGroup,
   IconMenuOrder,
-  IconLogout,
   IconChevronRight,
-  IconDeviceDesktop,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
 import jwt from "jsonwebtoken";
-import { nprogress } from "@mantine/nprogress";
-import { useRouter } from "next/navigation";
-import { LogoutButton, ColorSchemeToggler, FullScreenButton } from "@/components/Buttons";
+import {
+  LogoutButton,
+  ColorSchemeToggler,
+  FullScreenButton,
+  UserMenu,
+} from "@/components/Buttons";
+import { User } from "@/lib/definitions";
+import { getClientSideCookie } from "@/lib/clientUtils";
+import { withAuth } from "@/lib/withAuth";
 
 const NavLinks = [
   { label: "Home", href: "/", icon: <IconHomeFilled /> },
@@ -40,27 +42,7 @@ const NavLinks = [
   { label: "Settings", href: "/settings", icon: <IconAdjustmentsAlt /> },
 ];
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { req } = context;
-  const token = req.cookies.userToken || "";
-
-  try {
-    jwt.verify(token, process.env.JWT_SECRET as string);
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false,
-      },
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-};
+export const getServerSideProps = withAuth()
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [navbarOpen, { toggle }] = useDisclosure();
@@ -89,8 +71,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           </Group>
           <Group>
             <ColorSchemeToggler />
-            <FullScreenButton/>
-            <LogoutButton/>
+            <FullScreenButton />
+            <LogoutButton />
           </Group>
         </Group>
       </AppShell.Header>
@@ -122,12 +104,13 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 leftSection={link.icon}
                 rightSection={
                   <Text size="sm" c="dimmed">
-                    <IconChevronRight size={16}/>
+                    <IconChevronRight size={16} />
                   </Text>
                 }
               />
             ))}
           </Stack>
+          <UserMenu />
         </Stack>
       </AppShell.Navbar>
 

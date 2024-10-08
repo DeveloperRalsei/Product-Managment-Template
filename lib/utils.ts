@@ -1,5 +1,7 @@
-import { Database, OPEN_CREATE, OPEN_READWRITE } from "sqlite3";
+import { Database } from "sqlite3";
 import { dbPath } from "./definitions";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import jwt from 'jsonwebtoken'
 
 export const runQuery = (
   db: Database,
@@ -33,19 +35,6 @@ export const runQueryAll = (
   });
 };
 
-export const getCookie = (cookieName: string) => {
-  const cookies = document.cookie.split(";");
-
-  cookies.forEach((cookie) => {
-    const parts = cookie.split("=");
-    if (parts[0].trim() === cookieName) {
-      return parts[1].trim();
-    }
-  });
-
-  return "";
-};
-
 export const openDb = async (): Promise<Database> => {
   return new Promise((resolve, reject) => {
     const db = new Database(dbPath, (err) => {
@@ -57,3 +46,26 @@ export const openDb = async (): Promise<Database> => {
     });
   });
 };
+
+export function getToken(getServerSidePropsFunc?: GetServerSideProps) {
+  return async (context: GetServerSidePropsContext) => {
+    const { req } = context;
+    const token = req.cookies.userToken || "";
+
+    try {
+      jwt.verify(token, process.env.JWT_SECRET as string);
+      
+      if (getServerSidePropsFunc) {
+        return await getServerSidePropsFunc(context);
+      }
+      return { props: {token} };
+    } catch (error) {
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    }
+  };
+}

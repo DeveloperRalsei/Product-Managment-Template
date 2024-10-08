@@ -5,5 +5,5 @@ export type User = {
   id: number;
   name: string;
   email: string;
-  role: 0 | 1 | 2;
+  role: "user" | "mod" | "admin";
 }
