@@ -1,4 +1,4 @@
-import { MainLayout } from "@/layouts/mainLayout";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { User } from "@/lib/definitions";
 import { withAuth } from "@/lib/withAuth";
 import {
@@ -94,7 +94,7 @@ export default function CreateUser({ token }: { token: string }) {
   }
 
   return (
-    <MainLayout>
+    <DashboardLayout>
       <Stack>
         <Group w={"100%"}>
           <Title order={2} mb={"md"}>
@@ -160,6 +160,6 @@ export default function CreateUser({ token }: { token: string }) {
           </Button>
         </form>
       </Stack>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

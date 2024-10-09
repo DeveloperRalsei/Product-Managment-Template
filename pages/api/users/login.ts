@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { openDb } from "@/lib/utils";
+import { User } from "@/lib/definitions";
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,7 +26,7 @@ export default async function handler(
   db.get(
     "SELECT * FROM users WHERE email = ?",
     [email],
-    async (err, user: any) => {
+    async (err, user: User | any) => {
       if (err) {
         console.error("An error occurred while fetching data: ", err.message);
         return res
@@ -45,7 +46,7 @@ export default async function handler(
         }
 
         const token = jwt.sign(
-          { email: user.email, id: user.id, role: user.role },
+          { name: user.name, email: user.email, id: user.id, role: user.role },
           String(process.env.JWT_SECRET),
           {
             expiresIn: "1h",

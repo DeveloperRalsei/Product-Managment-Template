@@ -1,4 +1,4 @@
-import { MainLayout } from "@/layouts/mainLayout";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { User } from "@/lib/definitions";
 import { Alert, Button, Group, Stack, Text } from "@mantine/core";
 import { nprogress } from "@mantine/nprogress";
@@ -90,7 +90,7 @@ export default function DeleteUser({ token }: { token: string }) {
   }
 
   return (
-    <MainLayout>
+    <DashboardLayout>
       <form onSubmit={handleSubmit}>
         <Stack>
           {error && <Alert color="red">{error}</Alert>}
@@ -115,6 +115,6 @@ export default function DeleteUser({ token }: { token: string }) {
           </Group>
         </Stack>
       </form>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

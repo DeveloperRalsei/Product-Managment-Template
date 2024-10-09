@@ -1,5 +1,5 @@
 import { UserTable } from "@/components/UserTable";
-import { MainLayout } from "@/layouts/mainLayout";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { User } from "@/lib/definitions";
 import { withAuth } from "@/lib/withAuth";
 import {
@@ -51,7 +51,7 @@ export default function Users() {
   );
 
   return (
-    <MainLayout>
+    <DashboardLayout>
       <Stack>
         <Group w={"100%"} align={"center"}>
           <Title order={3} visibleFrom="xs">
@@ -72,6 +72,6 @@ export default function Users() {
         </Group>
         <UserTable users={filteredUsers} />
       </Stack>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

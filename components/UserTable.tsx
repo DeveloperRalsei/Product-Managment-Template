@@ -4,7 +4,13 @@ import { IconEdit, IconTrash } from "@tabler/icons-react";
 import Link from "next/link";
 
 export function UserTable({ users }: { users: User[] }) {
-  const data = users.map((user, index) => (
+
+  const sortedUsers = users.sort((a, b) => {
+    const roleOrder = ["admin", "mod", "user"];
+    return roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role);
+  })
+
+  const data = sortedUsers.map((user, index) => (
     <Table.Tr key={user.id}>
       <Table.Td>{index + 1}</Table.Td>
       <Table.Td>{user.name}</Table.Td>

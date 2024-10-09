@@ -30,8 +30,6 @@ import {
   FullScreenButton,
   UserMenu,
 } from "@/components/Buttons";
-import { User } from "@/lib/definitions";
-import { getClientSideCookie } from "@/lib/clientUtils";
 import { withAuth } from "@/lib/withAuth";
 
 const NavLinks = [
@@ -44,7 +42,7 @@ const NavLinks = [
 
 export const getServerSideProps = withAuth()
 
-export function MainLayout({ children }: { children: React.ReactNode }) {
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [navbarOpen, { toggle }] = useDisclosure();
 
   return (
@@ -72,7 +70,6 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           <Group>
             <ColorSchemeToggler />
             <FullScreenButton />
-            <LogoutButton />
           </Group>
         </Group>
       </AppShell.Header>

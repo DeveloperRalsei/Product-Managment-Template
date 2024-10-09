@@ -1,10 +1,10 @@
-import { MainLayout } from "@/layouts/mainLayout";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { withAuth } from "@/lib/withAuth";
 
 export const getServerSideProps = withAuth();
 
 export default function Dashboard() {
-  return <MainLayout>
+  return <DashboardLayout>
     <h1>Dashboard</h1>
-  </MainLayout>;
+  </DashboardLayout>;
 }

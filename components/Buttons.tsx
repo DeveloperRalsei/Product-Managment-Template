@@ -2,8 +2,11 @@ import {
   ActionIcon,
   Avatar,
   Grid,
+  Group,
   Loader,
   Menu,
+  Stack,
+  Text,
   useMantineColorScheme,
 } from "@mantine/core";
 import {
@@ -17,12 +20,9 @@ import {
 import { useFullscreen } from "@mantine/hooks";
 import { theme } from "@/pages/_app";
 import { nprogress } from "@mantine/nprogress";
-import { openConfirmModal } from "@mantine/modals";
 import router from "next/router";
 import { User } from "@/lib/definitions";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { UserContext } from '@/contexts/userContext'
 
 export function FullScreenButton() {
   const { toggle, fullscreen } = useFullscreen();
@@ -70,30 +70,54 @@ export function ColorSchemeToggler() {
 }
 
 export function UserMenu() {
-  const user = React.useContext(UserContext);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User>({
+    name: "Loading...",
+    email: "Loading...",
+    id: 0,
+    role: "user",
+  });
 
-  const errorStyle = {
-    color:"red"
-  }
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const response = await fetch("/api/whoami");
+
+        setUser(await response.json());
+      } catch (error) {
+        console.error(String(error));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, []);
 
   return (
     <Menu position="right-start">
       <Menu.Target>
         <ActionIcon size="lg">
-          <IconUserFilled />
+          {loading ? <Loader size={20} /> : <IconUserFilled />}
         </ActionIcon>
       </Menu.Target>
       <Menu.Dropdown p={"md"}>
-        <Grid>
-          <Grid.Col span={3}>
+        <Stack>
+          <Group>
             <Avatar />
-          </Grid.Col>
-          <Grid.Col>
-            {}
-          </Grid.Col>
-        </Grid>
-        <Menu.Divider />
-        test
+            {user.name}
+          </Group>
+          <Text c={"dimmed"} fz={"sm"}>
+            {user.email}
+          </Text>
+        </Stack>
+        <Menu.Divider mb={10}/>
+        <Group w={"100%"} justify="space-between">
+          <div></div>
+          <Group>
+            <LogoutButton />
+          </Group>
+        </Group>
       </Menu.Dropdown>
     </Menu>
   );

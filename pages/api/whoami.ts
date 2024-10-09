@@ -1,11 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 export default async function whoami(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const token = req.headers["authorization"]?.split(" ")[1];
+  const token = req.cookies["userToken"]
 
   if (!token) return res.status(401).json({ message: "Wrong Usage" });
 
