@@ -77,15 +77,15 @@ export default function CreateUser({ token }: { token: string }) {
         body: JSON.stringify(values),
       });
 
-      console.log(response);
-
       if (!response.ok || response.status === 401) {
-        setError("Something went wrong while adding user");
-        throw new Error("Something went wrong while adding user");
+        const data = await response.json()
+        setError(data.error);
+        throw new Error(data.error);
       }
 
       router.push("/dashboard/users");
     } catch (error: any) {
+      console.log(error)
       setError(error.message);
       console.error(error);
     } finally {

@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { openDb, runQuery } from "@/lib/utils";
+import { openDb, runQuery, runQueryAll } from "@/lib/utils";
 
 export default async function handler(
   req: NextApiRequest,
@@ -31,13 +31,14 @@ export default async function handler(
   }
 
   try {
+
     jwt.verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
       if (err) {
         return res.status(401).json({ error: "Unauthorized" });
       }
     });
 
-    const decoded = await jwt.decode(token) as jwt.JwtPayload
+    const decoded = jwt.decode(token) as jwt.JwtPayload
 
     if (decoded.role !== "admin") {
       return res.status(401).json({ error: "Unauthorized" });
@@ -51,6 +52,15 @@ export default async function handler(
       db,
       "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, password TEXT, role TEXT)"
     );
+
+    db.all("SELECT * FROM users WHERE email = ?", [email], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: "An error occurred" });
+      }
+      if (rows.length > 0) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
+    });
 
     await runQuery(
       db,

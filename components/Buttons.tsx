@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Avatar,
+  Badge,
   Grid,
   Group,
   Loader,
@@ -11,6 +12,7 @@ import {
 } from "@mantine/core";
 import {
   IconDeviceDesktop,
+  IconExternalLink,
   IconLogout,
   IconMoonFilled,
   IconSunFilled,
@@ -106,12 +108,25 @@ export function UserMenu() {
           <Group>
             <Avatar />
             {user.name}
+            <Badge
+              color={
+                user.role === "admin"
+                  ? "red"
+                  : user.role === "mod"
+                  ? "blue"
+                  : "green"
+              }>
+              {user.role}
+            </Badge>
           </Group>
-          <Text c={"dimmed"} fz={"sm"}>
-            {user.email}
+          <Text component="a" href={`mailto:${user.email}`} c={"dimmed"} fz={"sm"}> 
+            <Group gap={3}>
+              {user.email}
+              <IconExternalLink size={13} />
+            </Group>
           </Text>
         </Stack>
-        <Menu.Divider mb={10}/>
+        <Menu.Divider mb={10} />
         <Group w={"100%"} justify="space-between">
           <div></div>
           <Group>

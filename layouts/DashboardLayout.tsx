@@ -22,28 +22,67 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { GetServerSideProps } from "next";
-import jwt from "jsonwebtoken";
 import {
-  LogoutButton,
   ColorSchemeToggler,
   FullScreenButton,
   UserMenu,
 } from "@/components/Buttons";
 import { withAuth } from "@/lib/withAuth";
+import { User } from "@/lib/definitions";
+import { useRouter } from "next/router";
 
-const NavLinks = [
-  { label: "Home", href: "/", icon: <IconHomeFilled /> },
-  { label: "Products", href: "/products", icon: <IconAddressBook /> },
-  { label: "Users", href: "/users", icon: <IconUsersGroup /> },
-  { label: "Orders", href: "/orders", icon: <IconMenuOrder /> },
-  { label: "Settings", href: "/settings", icon: <IconAdjustmentsAlt /> },
-];
-
-export const getServerSideProps = withAuth()
+export const getServerSideProps = withAuth();
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [navbarOpen, { toggle }] = useDisclosure();
+  const [user, setUser] = useState<User>();
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const response = await fetch("/api/whoami");
+        const data = await response.json();
+        setUser(data);
+      } catch (error) {
+        useRouter().push("/login");
+      }
+    }
+
+    fetchUser();
+  }, []);
+
+  const NavLinks = [
+    {
+      label: "Home",
+      href: "/",
+      icon: <IconHomeFilled />,
+      isAccessable: user?.role === "admin" ? true : false,
+    },
+    {
+      label: "Products",
+      href: "/products",
+      icon: <IconAddressBook />,
+      isAccessable: user?.role === "admin" ? true : false,
+    },
+    {
+      label: "Users",
+      href: "/users",
+      icon: <IconUsersGroup />,
+      isAccessable: user?.role === "admin" ? true : false,
+    },
+    {
+      label: "Orders",
+      href: "/orders",
+      icon: <IconMenuOrder />,
+      isAccessable: user?.role === "admin" ? true : false,
+    },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: <IconAdjustmentsAlt />,
+      isAccessable: user?.role === "admin" ? true : false,
+    },
+  ];
 
   return (
     <AppShell
@@ -79,12 +118,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <Stack w={"100%"} h={"100%"} align={"center"} visibleFrom="sm">
             {NavLinks.map((link) => (
               <Tooltip
-                label={link.label}
+                label={
+                  link.isAccessable
+                    ? link.label
+                    : "Only admins can access in this page"
+                }
                 key={link.label}
                 position="right"
                 withArrow>
-                <Link href={`/dashboard${link.href}`}>
-                  <ActionIcon size={"lg"}>{link.icon}</ActionIcon>
+                <Link 
+                style={{display: link.isAccessable ? "inline-block" : "none"}}
+                href={`/dashboard${link.href}`}>
+                  <ActionIcon disabled={!link.isAccessable} size={"lg"}>
+                    {link.icon}
+                  </ActionIcon>
                 </Link>
               </Tooltip>
             ))}
